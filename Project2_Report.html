@@ -373,10 +373,11 @@ you will need to load the <code>tidyverse</code> and
 <pre class="r"><code>## Add your code for reading in the data here
 
 ## If the dataset is too large for your computer to handle, you can draw a
-## smaller random sub-sample of the data using the `sample_n()` function. For
+## smaller random sub-sample of the data using the `slice_sample()` function. For
 ## example 
 ##
-## dat_sub &lt;- sample_n(dat, 50000) 
+## dat_sub &lt;- dat |&gt; 
+##     slice_sample(n = 50000) 
 ## 
 ## draws a random sample of 50,000 rows from the `dat` object.</code></pre>
 </div>
