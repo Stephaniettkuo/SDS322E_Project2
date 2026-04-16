@@ -6,14 +6,16 @@ output: html_document
 ## Group Members
 
 Specify the names and EIDs of all group members (if not working in a group just put your own name and EID):
-
+Stephanie Kuo sk59344
+Tony Huang tkh699
+Annika Shivam aes5956 
 
 
 ## Question
 
 State question being addressed and describe the outcome variable to be predicted. Explain why it is useful to answer this question.
 
-**Write your answer here.**
+**Can we predict whether an animal arrives at the Austin Animal Center in healthy (Normal) condition based on animal type, intake type, and sex upon intake?" The outcome variable is Intake Condition, recoded as a binary variable where 1 = Normal (healthy) and 0 = Unhealthy/Other conditions (Injured, Sick, Neonatal, Feral, etc.). This question is useful because predicting an animal's condition upon arrival can help the shelter better allocate medical resources and staff This can ensure animals that are likely to arrive in poor condition receive prompt attention and care.**
 
 
 ## Data and Setup
@@ -23,6 +25,22 @@ Load the dataset into R below. In addition, load any packages that you will need
 
 ```{r}
 ## Add your code for reading in the data here
+
+# Load packages
+library(tidyverse)
+library(tidymodels)
+library(kknn)
+library(plotROC)
+
+# Load dataset
+Animal_Intakes <- read_csv("Austin_Animal_Center_Intakes_20250407.csv.gz")
+
+# Recode outcome variable as binary
+Animal_Intakes <- Animal_Intakes |>
+    mutate(Healthy = factor(ifelse(`Intake Condition` == "Normal", 1, 0)))
+
+# Take a look at the data
+head(Animal_Intakes)
 
 ## If the dataset is too large for your computer to handle, you can draw a
 ## smaller random sub-sample of the data using the `slice_sample()` function. For
@@ -53,14 +71,39 @@ Use 10-fold cross-validation on the training data to estimate either
 
 
 ```{r}
-## Add your code here
+# Set seed for reproducibility
+set.seed(322)
 
+# Split data into 75% training and 25% testing
+intakes_split <- initial_split(Animal_Intakes, prop = 0.75)
+train <- training(intakes_split)
+test <- testing(intakes_split)
+
+# Create recipe without Age upon Intake
+rec <- train |>
+    recipe(Healthy ~ `Animal Type` + `Intake Type` + `Sex upon Intake`)
+
+# Create logistic regression model
+model <- logistic_reg() |>
+    set_engine("glm") |>
+    set_mode("classification")
+
+# Create workflow
+wf <- workflow() |>
+    add_recipe(rec) |>
+    add_model(model)
+
+# Run 10-fold cross validation
+folds <- vfold_cv(train, v = 10)
+res <- fit_resamples(wf, resamples = folds)
+
+# Show performance metrics
+res |> collect_metrics()
 ```
 
 Which configuration of variables in your model seems to produce the best performing model on the training data?
 
-**Write your answer here.**
-
+**The model using Animal Type, Intake Type, and Sex upon Intake as predictors produced the best performing model on the training data, achieving an accuracy of 84.95%.**
 
 
 ## Alternate Prediction Model

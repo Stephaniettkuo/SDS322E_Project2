@@ -21,7 +21,7 @@ We will be working with the Austin Animal Center Intakes dataset.
 ## Question
 
 Specify the question you plan to ask/answer with this dataset:
-Can we predict whether an animal arrives in healthy (Normal) condition based on animal type, intake type, sex upon intake, and age upon intake?
+Can we predict whether an animal arrives in healthy (Normal) condition based on animal type, intake type, andsex upon intake?
 
 
 ## Outcome Variable
