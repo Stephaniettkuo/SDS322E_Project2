@@ -6,25 +6,28 @@ output: html_document
 ## Group Members
 
 Specify the names and EIDs of all group members (if not working in a group just put your own name and EID):
+Stephanie Kuo sk59344
+Tony Huang tkh699
+Annika Shivam aes5956
 
 
 
 ## Dataset
 
 Identify the dataset you plan to work with (provide a link to it if possible if it is not one of the suggested datasets):
-
+We will be working with the Austin Animal Center Intakes dataset.
 
 
 ## Question
 
 Specify the question you plan to ask/answer with this dataset:
-
+Can we predict whether an animal arrives in healthy (Normal) condition based on animal type, intake type, sex upon intake, and age upon intake?
 
 
 ## Outcome Variable
 
 What is the outcome variable in your dataset that you will be predicting? **For the purposes of this project, the outcome should either be continuous or binary**.
-
+The outcome variable we will be predicting is the "Intake Condition." We will code this into a binary variable (1 = Healthy (Normal), 0 = Unhealthy (all other conditions)). 
 
 
 ## Outcome Summary
@@ -36,7 +39,20 @@ Provide a summary plot of the outcome variable. For example, if it is a continuo
 ```{r}
 library(tidyverse)
 
-## Add your code here
+## renaming dataset to something shorter -> "Animal_Intakes"
+Animal_Intakes <- read_csv("Austin_Animal_Center_Intakes_20250407.csv.gz")
+
+# Recode outcome as binary
+Animal_Intakes <- Animal_Intakes |>
+    mutate(Healthy = factor(ifelse(`Intake Condition` == "Normal", 1, 0)))
+
+# Summary barplot of outcome variable
+Animal_Intakes |>
+    ggplot(aes(x = Healthy, fill = Healthy)) +
+    geom_bar() +
+    labs(title = "Distribution of Animal Intake Condition",
+         x = "Condition (0 = Unhealthy, 1 = Healthy)",
+         y = "Count")
 
 
 
