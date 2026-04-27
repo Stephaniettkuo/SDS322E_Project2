@@ -197,7 +197,7 @@ Suppose you had the ability to improve the fit of the model by collecting data o
 
 ```
 
-**Write your answer here.**
+**Collecting data on the environment the animal was in before transportation to the shelter could improve the fit of the model. If the animal is from a house, did there appear to be food and care, or was it largely neglected? If the animal is from a street, does it look like it's been struggling to find food? The classification of the environment quality could be as simple as very poor/poor/fair/good/excellent. Based off this classification, if an animal is from a fair or poor environment, it has a higher likelihood of needing more care and attention. This will help the shelter understand the health of the animal better, and will likely improve our model prediction as well.**
 
 
 
@@ -206,7 +206,7 @@ Suppose you had the ability to improve the fit of the model by collecting data o
 
 Reflect on the process of conducting this project. What was challenging, what have you learned from the process itself? Was there anything that was unexpected that you found during this analysis? If so, what was your expectation and how did the experience deviate from your expectation?
 
-**Write your answer here.**
+**We enjoyed reviewing concepts from the class and putting our models together to answer a question that could make a real impact. One of the difficult parts of this project was working to fine-tune the parameters for the model, but we learned that taking the time to do so ensures a more optimal outcome. We did not expect logistic regression model to outperform the KNN model, but for our question, it seems that a binary outcome was better predicted with our variables through a non machine-learning approach.**
 
 
 

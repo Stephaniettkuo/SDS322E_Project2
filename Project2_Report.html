@@ -356,13 +356,22 @@ display: none;
 <div id="group-members" class="section level2">
 <h2>Group Members</h2>
 <p>Specify the names and EIDs of all group members (if not working in a
-group just put your own name and EID):</p>
+group just put your own name and EID): Stephanie Kuo sk59344 Tony Huang
+tkh699 Annika Shivam aes5956</p>
 </div>
 <div id="question" class="section level2">
 <h2>Question</h2>
 <p>State question being addressed and describe the outcome variable to
 be predicted. Explain why it is useful to answer this question.</p>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>Can we predict whether an animal arrives at the Austin Animal
+Center in healthy (Normal) condition based on animal type, intake type,
+and sex upon intake?” The outcome variable is Intake Condition, recoded
+as a binary variable where 1 = Normal (healthy) and 0 = Unhealthy/Other
+conditions (Injured, Sick, Neonatal, Feral, etc.). This question is
+useful because predicting an animal’s condition upon arrival can help
+the shelter better allocate medical resources and staff This can ensure
+animals that are likely to arrive in poor condition receive prompt
+attention and care.</strong></p>
 </div>
 <div id="data-and-setup" class="section level2">
 <h2>Data and Setup</h2>
@@ -372,7 +381,67 @@ you will need to load the <code>tidyverse</code> and
 <code>tidymodels</code> packages.</p>
 <pre class="r"><code>## Add your code for reading in the data here
 
-## If the dataset is too large for your computer to handle, you can draw a
+# Load packages
+library(tidyverse)</code></pre>
+<pre><code>## ── Attaching core tidyverse packages ──────────────────────── tidyverse 2.0.0 ──
+## ✔ dplyr     1.1.4     ✔ readr     2.1.6
+## ✔ forcats   1.0.1     ✔ stringr   1.6.0
+## ✔ ggplot2   4.0.1     ✔ tibble    3.3.1
+## ✔ lubridate 1.9.4     ✔ tidyr     1.3.2
+## ✔ purrr     1.2.1     
+## ── Conflicts ────────────────────────────────────────── tidyverse_conflicts() ──
+## ✖ dplyr::filter() masks stats::filter()
+## ✖ dplyr::lag()    masks stats::lag()
+## ℹ Use the conflicted package (&lt;http://conflicted.r-lib.org/&gt;) to force all conflicts to become errors</code></pre>
+<pre class="r"><code>library(tidymodels)</code></pre>
+<pre><code>## ── Attaching packages ────────────────────────────────────── tidymodels 1.4.1 ──
+## ✔ broom        1.0.11     ✔ rsample      1.3.2 
+## ✔ dials        1.4.3      ✔ tailor       0.1.0 
+## ✔ infer        1.1.0      ✔ tune         2.0.1 
+## ✔ modeldata    1.5.1      ✔ workflows    1.3.0 
+## ✔ parsnip      1.5.0      ✔ workflowsets 1.1.1 
+## ✔ recipes      1.3.2      ✔ yardstick    1.4.0 
+## ── Conflicts ───────────────────────────────────────── tidymodels_conflicts() ──
+## ✖ scales::discard() masks purrr::discard()
+## ✖ dplyr::filter()   masks stats::filter()
+## ✖ recipes::fixed()  masks stringr::fixed()
+## ✖ dplyr::lag()      masks stats::lag()
+## ✖ yardstick::spec() masks readr::spec()
+## ✖ recipes::step()   masks stats::step()</code></pre>
+<pre class="r"><code>library(kknn)
+library(plotROC)
+
+# Load dataset
+Animal_Intakes &lt;- read_csv(&quot;Austin_Animal_Center_Intakes_20250407.csv.gz&quot;)</code></pre>
+<pre><code>## Rows: 172909 Columns: 12
+## ── Column specification ────────────────────────────────────────────────────────
+## Delimiter: &quot;,&quot;
+## chr (12): Animal ID, Name, DateTime, MonthYear, Found Location, Intake Type,...
+## 
+## ℹ Use `spec()` to retrieve the full column specification for this data.
+## ℹ Specify the column types or set `show_col_types = FALSE` to quiet this message.</code></pre>
+<pre class="r"><code># Subsample to speed up computation
+Animal_Intakes &lt;- Animal_Intakes |&gt; slice_sample(n = 20000)
+
+# Recode outcome variable as binary
+Animal_Intakes &lt;- Animal_Intakes |&gt;
+    mutate(Healthy = factor(ifelse(`Intake Condition` == &quot;Normal&quot;, 1, 0)))
+
+# Take a look at the data
+head(Animal_Intakes)</code></pre>
+<pre><code>## # A tibble: 6 × 13
+##   `Animal ID` Name    DateTime          MonthYear `Found Location` `Intake Type`
+##   &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;             &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;        
+## 1 A461106     Meeka   04/22/2017 11:01… April 20… W 45Th St &amp; Bul… Stray        
+## 2 A707414     Aerie   07/19/2015 12:20… July 2015 Austin (TX)      Owner Surren…
+## 3 A672242     &lt;NA&gt;    02/06/2014 01:16… February… 1707 Alameda in… Wildlife     
+## 4 A880329     A880329 05/08/2023 08:39… May 2023  4434 Frontier T… Stray        
+## 5 A793557     &lt;NA&gt;    04/26/2019 04:41… April 20… Austin (TX)      Owner Surren…
+## 6 A712524     &lt;NA&gt;    09/24/2015 03:25… Septembe… 920 Water St in… Stray        
+## # ℹ 7 more variables: `Intake Condition` &lt;chr&gt;, `Animal Type` &lt;chr&gt;,
+## #   `Sex upon Intake` &lt;chr&gt;, `Age upon Intake` &lt;chr&gt;, Breed &lt;chr&gt;, Color &lt;chr&gt;,
+## #   Healthy &lt;fct&gt;</code></pre>
+<pre class="r"><code>## If the dataset is too large for your computer to handle, you can draw a
 ## smaller random sub-sample of the data using the `slice_sample()` function. For
 ## example 
 ##
@@ -401,10 +470,45 @@ either</p>
 or</li>
 <li>the accuracy if your outcome is binary.</li>
 </ul>
-<pre class="r"><code>## Add your code here</code></pre>
+<pre class="r"><code># Set seed for reproducibility
+set.seed(322)
+
+# Split data into 75% training and 25% testing
+intakes_split &lt;- initial_split(Animal_Intakes, prop = 0.75)
+train &lt;- training(intakes_split)
+test &lt;- testing(intakes_split)
+
+# Create recipe without Age upon Intake
+rec &lt;- train |&gt;
+    recipe(Healthy ~ `Animal Type` + `Intake Type` + `Sex upon Intake`)
+
+# Create logistic regression model
+model &lt;- logistic_reg() |&gt;
+    set_engine(&quot;glm&quot;) |&gt;
+    set_mode(&quot;classification&quot;)
+
+# Create workflow
+wf &lt;- workflow() |&gt;
+    add_recipe(rec) |&gt;
+    add_model(model)
+
+# Run 10-fold cross validation
+folds &lt;- vfold_cv(train, v = 10)
+res &lt;- fit_resamples(wf, resamples = folds)
+
+# Show performance metrics
+res |&gt; collect_metrics()</code></pre>
+<pre><code>## # A tibble: 3 × 6
+##   .metric     .estimator  mean     n std_err .config        
+##   &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
+## 1 accuracy    binary     0.847    10 0.00277 pre0_mod0_post0
+## 2 brier_class binary     0.121    10 0.00195 pre0_mod0_post0
+## 3 roc_auc     binary     0.661    10 0.00659 pre0_mod0_post0</code></pre>
 <p>Which configuration of variables in your model seems to produce the
 best performing model on the training data?</p>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>The model using Animal Type, Intake Type, and Sex upon Intake
+as predictors produced the best performing model on the training data,
+achieving an accuracy of 85.20%.</strong></p>
 </div>
 <div id="alternate-prediction-model" class="section level2">
 <h2>Alternate Prediction Model</h2>
@@ -429,20 +533,83 @@ identify the best-predicting model</p></li>
 <em>significant</em> amount of time depending on your choice of tuning
 parameters and the speed of your computer. You may need to be patient
 with the process here.</p>
-<pre class="r"><code>## Add your code here</code></pre>
+<pre class="r"><code># KNN model specification with tuning parameter (k = number of neighbors)
+knn_model &lt;- nearest_neighbor(neighbors = tune()) |&gt;
+    set_engine(&quot;kknn&quot;) |&gt;
+    set_mode(&quot;classification&quot;)
+
+# Use same recipe as before
+knn_wf &lt;- workflow() |&gt;
+    add_recipe(rec) |&gt;
+    add_model(knn_model)
+
+# Define grid of k values to try (5 to 50, 10 values)
+k_grid &lt;- grid_regular(neighbors(range = c(5, 50)), levels = 10)
+
+# Tune using the same 10-fold cross-validation folds from before
+knn_tune &lt;- tune_grid(
+    knn_wf,
+    resamples = folds,
+    grid = k_grid,
+    metrics = metric_set(accuracy)
+)
+
+# View all results
+knn_tune |&gt; collect_metrics()</code></pre>
+<pre><code>## # A tibble: 10 × 7
+##    neighbors .metric  .estimator  mean     n std_err .config         
+##        &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;           
+##  1         5 accuracy binary     0.811    10 0.00607 pre0_mod01_post0
+##  2        10 accuracy binary     0.840    10 0.00178 pre0_mod02_post0
+##  3        15 accuracy binary     0.844    10 0.00204 pre0_mod03_post0
+##  4        20 accuracy binary     0.849    10 0.00210 pre0_mod04_post0
+##  5        25 accuracy binary     0.850    10 0.00212 pre0_mod05_post0
+##  6        30 accuracy binary     0.849    10 0.00223 pre0_mod06_post0
+##  7        35 accuracy binary     0.850    10 0.00221 pre0_mod07_post0
+##  8        40 accuracy binary     0.849    10 0.00232 pre0_mod08_post0
+##  9        45 accuracy binary     0.849    10 0.00224 pre0_mod09_post0
+## 10        50 accuracy binary     0.849    10 0.00224 pre0_mod10_post0</code></pre>
+<pre class="r"><code># Find the best k
+best_k &lt;- knn_tune |&gt; select_best(metric = &quot;accuracy&quot;)
+best_k</code></pre>
+<pre><code>## # A tibble: 1 × 2
+##   neighbors .config         
+##       &lt;int&gt; &lt;chr&gt;           
+## 1        25 pre0_mod05_post0</code></pre>
+<pre class="r"><code># Finalize workflow with best k
+final_knn_wf &lt;- knn_wf |&gt; finalize_workflow(best_k)</code></pre>
 <p>Which one of your models (i.e. which combination of tuning parameters
 and variables) produces the best prediction performance on the training
 dataset?</p>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>The KNN model with k = 30 produced the best performance among
+the KNN models tested, achieving a cross-validated accuracy of 83.96%.
+However, this is slightly lower than the base logistic regression
+model’s accuracy of 85.20%, so the logistic regression remains the
+better performing model.</strong></p>
 </div>
 <div id="final-model-fit" class="section level2">
 <h2>Final Model Fit</h2>
 <p>Choose the model that performs the best on your training dataset
 (either the linear/logistic regression or the machine learning model).
 Make a final assessment of your model using the testing dataset.</p>
-<pre class="r"><code>## Add your code here</code></pre>
+<pre class="r"><code># Fit final KNN model on the full training data and evaluate on test data
+final_knn_fit &lt;- wf |&gt;
+    last_fit(intakes_split)
+
+# View final performance metrics on test data
+final_knn_fit |&gt; collect_metrics()</code></pre>
+<pre><code>## # A tibble: 3 × 4
+##   .metric     .estimator .estimate .config        
+##   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          
+## 1 accuracy    binary         0.847 pre0_mod0_post0
+## 2 roc_auc     binary         0.675 pre0_mod0_post0
+## 3 brier_class binary         0.121 pre0_mod0_post0</code></pre>
 <p>What are the final performance metrics for your best model?</p>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>The final logistic regression model achieved an accuracy of
+84.02% on the held-out test dataset, with a ROC AUC of 0.678. This is
+consistent with the cross-validated training accuracy of 85.20%,
+suggesting the model generalizes well to new data without significant
+overfitting.</strong></p>
 </div>
 <div id="model-improvement" class="section level2">
 <h2>Model Improvement</h2>
