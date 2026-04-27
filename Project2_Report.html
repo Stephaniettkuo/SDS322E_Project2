@@ -430,14 +430,14 @@ Animal_Intakes &lt;- Animal_Intakes |&gt;
 # Take a look at the data
 head(Animal_Intakes)</code></pre>
 <pre><code>## # A tibble: 6 × 13
-##   `Animal ID` Name    DateTime          MonthYear `Found Location` `Intake Type`
-##   &lt;chr&gt;       &lt;chr&gt;   &lt;chr&gt;             &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;        
-## 1 A461106     Meeka   04/22/2017 11:01… April 20… W 45Th St &amp; Bul… Stray        
-## 2 A707414     Aerie   07/19/2015 12:20… July 2015 Austin (TX)      Owner Surren…
-## 3 A672242     &lt;NA&gt;    02/06/2014 01:16… February… 1707 Alameda in… Wildlife     
-## 4 A880329     A880329 05/08/2023 08:39… May 2023  4434 Frontier T… Stray        
-## 5 A793557     &lt;NA&gt;    04/26/2019 04:41… April 20… Austin (TX)      Owner Surren…
-## 6 A712524     &lt;NA&gt;    09/24/2015 03:25… Septembe… 920 Water St in… Stray        
+##   `Animal ID` Name       DateTime       MonthYear `Found Location` `Intake Type`
+##   &lt;chr&gt;       &lt;chr&gt;      &lt;chr&gt;          &lt;chr&gt;     &lt;chr&gt;            &lt;chr&gt;        
+## 1 A724648     Dexter     03/24/2017 11… March 20… E Rundberg Ln A… Stray        
+## 2 A769983     *Cheyenne  04/13/2018 04… April 20… Austin (TX)      Owner Surren…
+## 3 A841307     *Peanut    08/25/2021 03… August 2… 2901 S Capital … Stray        
+## 4 A888303     Diego      09/04/2023 07… Septembe… 2321 Campden Dr… Stray        
+## 5 A767400     Heathcliff 04/07/2018 11… April 20… Austin (TX)      Owner Surren…
+## 6 A714155     *Drusilla  10/18/2015 07… October … 13127 Elmgrove … Stray        
 ## # ℹ 7 more variables: `Intake Condition` &lt;chr&gt;, `Animal Type` &lt;chr&gt;,
 ## #   `Sex upon Intake` &lt;chr&gt;, `Age upon Intake` &lt;chr&gt;, Breed &lt;chr&gt;, Color &lt;chr&gt;,
 ## #   Healthy &lt;fct&gt;</code></pre>
@@ -499,11 +499,11 @@ res &lt;- fit_resamples(wf, resamples = folds)
 # Show performance metrics
 res |&gt; collect_metrics()</code></pre>
 <pre><code>## # A tibble: 3 × 6
-##   .metric     .estimator  mean     n std_err .config        
-##   &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;          
-## 1 accuracy    binary     0.847    10 0.00277 pre0_mod0_post0
-## 2 brier_class binary     0.121    10 0.00195 pre0_mod0_post0
-## 3 roc_auc     binary     0.661    10 0.00659 pre0_mod0_post0</code></pre>
+##   .metric     .estimator  mean     n  std_err .config        
+##   &lt;chr&gt;       &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;    &lt;dbl&gt; &lt;chr&gt;          
+## 1 accuracy    binary     0.842    10 0.00170  pre0_mod0_post0
+## 2 brier_class binary     0.125    10 0.000824 pre0_mod0_post0
+## 3 roc_auc     binary     0.655    10 0.00627  pre0_mod0_post0</code></pre>
 <p>Which configuration of variables in your model seems to produce the
 best performing model on the training data?</p>
 <p><strong>The model using Animal Type, Intake Type, and Sex upon Intake
@@ -552,30 +552,36 @@ knn_tune &lt;- tune_grid(
     resamples = folds,
     grid = k_grid,
     metrics = metric_set(accuracy)
-)
-
-# View all results
+)</code></pre>
+<pre><code>## → A | error:   Assigned data `.ind` must be compatible with existing data.
+##                ✖ Existing data has 1499 rows.
+##                ✖ Assigned data has 1500 rows.
+##                ℹ Only vectors of size 1 are recycled.
+##                Caused by error in `vectbl_recycle_rhs_rows()`:
+##                ! Can&#39;t recycle input of size 1500 to size 1499.</code></pre>
+<pre><code>## There were issues with some computations   A: x1There were issues with some computations   A: x3There were issues with some computations   A: x6There were issues with some computations   A: x10There were issues with some computations   A: x15There were issues with some computations   A: x21There were issues with some computations   A: x28There were issues with some computations   A: x36There were issues with some computations   A: x45There were issues with some computations   A: x55There were issues with some computations   A: x55</code></pre>
+<pre class="r"><code># View all results
 knn_tune |&gt; collect_metrics()</code></pre>
 <pre><code>## # A tibble: 10 × 7
 ##    neighbors .metric  .estimator  mean     n std_err .config         
 ##        &lt;int&gt; &lt;chr&gt;    &lt;chr&gt;      &lt;dbl&gt; &lt;int&gt;   &lt;dbl&gt; &lt;chr&gt;           
-##  1         5 accuracy binary     0.811    10 0.00607 pre0_mod01_post0
-##  2        10 accuracy binary     0.840    10 0.00178 pre0_mod02_post0
-##  3        15 accuracy binary     0.844    10 0.00204 pre0_mod03_post0
-##  4        20 accuracy binary     0.849    10 0.00210 pre0_mod04_post0
-##  5        25 accuracy binary     0.850    10 0.00212 pre0_mod05_post0
-##  6        30 accuracy binary     0.849    10 0.00223 pre0_mod06_post0
-##  7        35 accuracy binary     0.850    10 0.00221 pre0_mod07_post0
-##  8        40 accuracy binary     0.849    10 0.00232 pre0_mod08_post0
-##  9        45 accuracy binary     0.849    10 0.00224 pre0_mod09_post0
-## 10        50 accuracy binary     0.849    10 0.00224 pre0_mod10_post0</code></pre>
+##  1         5 accuracy binary     0.836     9 0.00272 pre0_mod01_post0
+##  2        10 accuracy binary     0.842     9 0.00198 pre0_mod02_post0
+##  3        15 accuracy binary     0.843     9 0.00170 pre0_mod03_post0
+##  4        20 accuracy binary     0.840     9 0.00288 pre0_mod04_post0
+##  5        25 accuracy binary     0.842     9 0.00205 pre0_mod05_post0
+##  6        30 accuracy binary     0.842     9 0.00223 pre0_mod06_post0
+##  7        35 accuracy binary     0.842     9 0.002   pre0_mod07_post0
+##  8        40 accuracy binary     0.842     9 0.00220 pre0_mod08_post0
+##  9        45 accuracy binary     0.843     9 0.00179 pre0_mod09_post0
+## 10        50 accuracy binary     0.844     9 0.00197 pre0_mod10_post0</code></pre>
 <pre class="r"><code># Find the best k
 best_k &lt;- knn_tune |&gt; select_best(metric = &quot;accuracy&quot;)
 best_k</code></pre>
 <pre><code>## # A tibble: 1 × 2
 ##   neighbors .config         
 ##       &lt;int&gt; &lt;chr&gt;           
-## 1        25 pre0_mod05_post0</code></pre>
+## 1        50 pre0_mod10_post0</code></pre>
 <pre class="r"><code># Finalize workflow with best k
 final_knn_wf &lt;- knn_wf |&gt; finalize_workflow(best_k)</code></pre>
 <p>Which one of your models (i.e. which combination of tuning parameters
@@ -601,9 +607,9 @@ final_knn_fit |&gt; collect_metrics()</code></pre>
 <pre><code>## # A tibble: 3 × 4
 ##   .metric     .estimator .estimate .config        
 ##   &lt;chr&gt;       &lt;chr&gt;          &lt;dbl&gt; &lt;chr&gt;          
-## 1 accuracy    binary         0.847 pre0_mod0_post0
-## 2 roc_auc     binary         0.675 pre0_mod0_post0
-## 3 brier_class binary         0.121 pre0_mod0_post0</code></pre>
+## 1 accuracy    binary         0.857 pre0_mod0_post0
+## 2 roc_auc     binary         0.649 pre0_mod0_post0
+## 3 brier_class binary         0.116 pre0_mod0_post0</code></pre>
 <p>What are the final performance metrics for your best model?</p>
 <p><strong>The final logistic regression model achieved an accuracy of
 84.02% on the held-out test dataset, with a ROC AUC of 0.678. This is
@@ -620,7 +626,17 @@ you think collecting this new variable would improve the prediction
 performance. You may optionally include some code/analysis to support
 your explanation.</p>
 <pre class="r"><code>## Optional: Add any supporting code here</code></pre>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>Collecting data on the environment the animal was in before
+transportation to the shelter could improve the fit of the model. If the
+animal is from a house, did there appear to be food and care, or was it
+largely neglected? If the animal is from a street, does it look like
+it’s been struggling to find food? The classification of the environment
+quality could be as simple as very poor/poor/fair/good/excellent. Based
+off this classification, if an animal is from a fair or poor
+environment, it has a higher likelihood of needing more care and
+attention. This will help the shelter understand the health of the
+animal better, and will likely improve our model prediction as
+well.</strong></p>
 </div>
 <div id="discussion" class="section level2">
 <h2>Discussion</h2>
@@ -629,7 +645,14 @@ challenging, what have you learned from the process itself? Was there
 anything that was unexpected that you found during this analysis? If so,
 what was your expectation and how did the experience deviate from your
 expectation?</p>
-<p><strong>Write your answer here.</strong></p>
+<p><strong>We enjoyed reviewing concepts from the class and putting our
+models together to answer a question that could make a real impact. One
+of the difficult parts of this project was working to fine-tune the
+parameters for the model, but we learned that taking the time to do so
+ensures a more optimal outcome. We did not expect logistic regression
+model to outperform the KNN model, but for our question, it seems that a
+binary outcome was better predicted with our variables through a non
+machine-learning approach.</strong></p>
 </div>
 <div id="submission-to-gradescope" class="section level2">
 <h2>Submission to Gradescope</h2>
